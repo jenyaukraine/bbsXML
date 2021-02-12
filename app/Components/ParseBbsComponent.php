@@ -34,12 +34,22 @@ class ParseBbsComponent
         $EISSN = str_replace('-', '', $dom->findOne('meta[name="citation_issn"]')->getAttribute('content'));
         $Volume = $dom->findOne('meta[name="citation_volume"]')->getAttribute('content');
         $Issue = $dom->findOne('meta[name="citation_issue"]')->getAttribute('content');
+
+
         $pubdate = $dom->findOne('meta[name="citation_publication_date"]')->getAttribute('content');
+
+        $pubdate = explode('/', $pubdate);
+
+        $PubDate = [
+            'Year' => $pubdate[0],
+            'Month' => $pubdate[1],
+            'Day' => $pubdate[2],
+        ];
 
         $ArticleTitle = $dom->findOne('h1')->innerHtml();
 
-        $firstPage = $dom->findOne('meta[name="citation_firstpage"]')->getAttribute('content');
-        $lastPage = $dom->findOne('meta[name="citation_lastpage"]')->getAttribute('content');
+        $FirstPage = $dom->findOne('meta[name="citation_firstpage"]')->getAttribute('content');
+        $LastPage = $dom->findOne('meta[name="citation_lastpage"]')->getAttribute('content');
 
         $Language = 'EN';
 
@@ -81,7 +91,7 @@ class ParseBbsComponent
         $abstractPdf = $dom->findOne('meta[name="citation_pdf_url"]')->getAttribute('content');
 
         XMLCreatorComponent::create(compact('PublisherName', 'JournalTitle', 'PISSN', 'EISSN', 'Volume', 'Issue',
-            'pubdate', 'ArticleTitle', 'firstPage', 'lastPage', 'Language', 'AuthorList', 'DOI', 'Abstract', 'Keywords' ,'abstractUrl', 'abstractPdf'));
+            'PubDate', 'ArticleTitle', 'FirstPage', 'LastPage', 'Language', 'AuthorList', 'DOI', 'Abstract', 'Keywords' ,'abstractUrl', 'abstractPdf'));
 
     }
 }
