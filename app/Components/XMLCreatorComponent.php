@@ -136,6 +136,6 @@ class XMLCreatorComponent {
 
         xmlwriter_end_element($xw); // ArticleSet
         xmlwriter_end_document($xw);
-        echo xmlwriter_output_memory($xw);
+        return xmlwriter_output_memory($xw);
     }
 }

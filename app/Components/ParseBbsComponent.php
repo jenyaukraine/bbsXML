@@ -90,8 +90,11 @@ class ParseBbsComponent
         $abstractUrl = $this->website;
         $abstractPdf = $dom->findOne('meta[name="citation_pdf_url"]')->getAttribute('content');
 
-        XMLCreatorComponent::create(compact('PublisherName', 'JournalTitle', 'PISSN', 'EISSN', 'Volume', 'Issue',
+        $xml = XMLCreatorComponent::create(compact('PublisherName', 'JournalTitle', 'PISSN', 'EISSN', 'Volume', 'Issue',
             'PubDate', 'ArticleTitle', 'FirstPage', 'LastPage', 'Language', 'AuthorList', 'DOI', 'Abstract', 'Keywords' ,'abstractUrl', 'abstractPdf'));
+
+
+        file_put_contents('bbsoutput.xml', $xml);
 
     }
 }
