@@ -4,7 +4,7 @@ namespace App\Components;
 
 use App\Components\CurlGetterComponent;
 use voku\helper\HtmlDomParser;
-use function simplehtmldom_1_5\file_get_html;
+use App\Components\XMLCreatorComponent;
 
 class ParseBbsComponent
 {
@@ -29,19 +29,45 @@ class ParseBbsComponent
         $dom = HtmlDomParser::str_get_html($result);
 
         $PublisherName = 'LLC "CPC "Business Perspectives"';
-        $JournalTitle = '';
+        $JournalTitle = $dom->findOne('meta[name="citation_journal_title"]')->getAttribute('content');
+        $PISSN = str_replace('-', '', $dom->findOne('issn[media_type="print"]')->text());
+        $EISSN = str_replace('-', '', $dom->findOne('meta[name="citation_issn"]')->getAttribute('content'));
+        $Volume = $dom->findOne('meta[name="citation_volume"]')->getAttribute('content');
+        $Issue = $dom->findOne('meta[name="citation_issue"]')->getAttribute('content');
+        $pubdate = $dom->findOne('meta[name="citation_publication_date"]')->getAttribute('content');
 
         $ArticleTitle = $dom->findOne('h1')->innerHtml();
 
-
         $firstPage = $dom->findOne('meta[name="citation_firstpage"]')->getAttribute('content');
         $lastPage = $dom->findOne('meta[name="citation_lastpage"]')->getAttribute('content');
-        $volume = $dom->findOne('meta[name="citation_volume"]')->getAttribute('content');
 
-        $pubdate = $dom->findOne('meta[name="citation_publication_date"]')->getAttribute('content');
+        $Language = 'EN';
 
-        $EISSN = str_replace('-', '', $dom->findOne('meta[name="citation_issn"]')->getAttribute('content'));
-        $issn = str_replace('-', '', $dom->findOne('issn[media_type="print"]')->text());
+        //Authour case
+
+        $authorAF = $dom->findMulti('meta[name="citation_author_affiliation"]');
+        $authAF = [];
+        foreach ($authorAF as $a) {
+            $authAF[] = $a->getAttribute('content');
+        }
+
+        $author = $dom->findMulti('meta[name="citation_author"]');
+        $AuthorList = [];
+        foreach ($author as $key => $a) {
+            $Author = [];
+            $depdata = explode(' ', $a->getAttribute('content'));
+
+            $Author['FirstName'] = array_shift($depdata);
+            $Author['LastName'] = array_pop($depdata);
+            $Author['MiddleName'] = implode(' ', $depdata);
+            $Author['Affiliation'] = $authAF[$key];
+            $Author['AuthorEmails'] = '';
+
+            $AuthorList[] = $Author;
+        }
+
+
+        // End Authour
 
 
         $DOI = $dom->findOne('li[data-zoocart-id="9d254ae3-ea9e-474c-bbbf-656b90b1620c"] > .txt')->text();
@@ -54,26 +80,8 @@ class ParseBbsComponent
         $abstractUrl = $this->website;
         $abstractPdf = $dom->findOne('meta[name="citation_pdf_url"]')->getAttribute('content');
 
-
-        $author = $dom->findMulti('meta[name="citation_author"]');
-        $authName = [];
-        foreach ($author as $a)
-        {
-            $authName[] = $a->getAttribute('content'). PHP_EOL;
-        }
-
-        $authorAF = $dom->findMulti('meta[name="citation_author_affiliation"]');
-        $authAF = [];
-        foreach ($authorAF as $a)
-        {
-            $authAF[] = $a->getAttribute('content'). PHP_EOL;
-        }
-
-        foreach ($authName as $key => $t) {
-            print_r($t. " : : : ". $authAF[$key] . PHP_EOL);
-        }
-
-
+        XMLCreatorComponent::create(compact('PublisherName', 'JournalTitle', 'PISSN', 'EISSN', 'Volume', 'Issue',
+            'pubdate', 'ArticleTitle', 'firstPage', 'lastPage', 'Language', 'AuthorList', 'DOI', 'Abstract', 'Keywords' ,'abstractUrl', 'abstractPdf'));
 
     }
 }

@@ -2,7 +2,8 @@
 namespace App\Components;
 
 class XMLCreatorComponent {
-    public function __construct()
+    public static function create($data)
     {
+        print_r($data);
     }
 }
